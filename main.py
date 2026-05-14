@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
+import ollama
 
 app = FastAPI()
 
@@ -27,6 +28,23 @@ def chat(request: ChatRequest):
 
     user_message = request.message
 
+    # Send message to Ollama
+    response = ollama.chat(
+        model="mistral",
+        messages=[
+            {
+                "role": "system",
+                "content": "You are CloveToolBot, an AI assistant for BIM, construction, surveying, GIS, digital construction, architecture, engineering, and infrastructure workflows."
+            },
+            {
+                "role": "user",
+                "content": user_message
+            }
+        ]
+    )
+
+    ai_response = response["message"]["content"]
+
     return {
-        "response": f"You asked: {user_message}"
+        "response": ai_response
     }

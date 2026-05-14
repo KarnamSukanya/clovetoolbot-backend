@@ -1,0 +1,13 @@
+Building Information Modeling (BIM) is a digital process used in architecture, engineering, and construction industries.
+
+BIM enables intelligent 3D modeling, coordination, clash detection, project visualization, quantity estimation, facility management, and lifecycle management.
+
+LOD stands for Level of Development.
+
+LOD 100 = Conceptual
+LOD 200 = Approximate geometry
+LOD 300 = Accurate geometry
+LOD 400 = Fabrication level
+LOD 500 = As-built verified model
+
+Scan to BIM is the process of converting point cloud or LiDAR scan data into intelligent BIM models using software such as Autodesk Revit.
