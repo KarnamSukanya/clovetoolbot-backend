@@ -1,3 +1,6 @@
 venv/
 __pycache__/
+database/
+google_credentials.json
+*.pyc
 .env
