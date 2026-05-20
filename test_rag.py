@@ -2,9 +2,9 @@ from services.rag_service import generate_rag_response
 
 
 query = """
-Need AutoLISP automation for UCS level alignment,
-annotation spacing,
-and CAD drafting standardization
+Need AutoLISP function using
+vla-InsertBlock and
+vlax-curve-getPointAtDist
 """
 
 response = generate_rag_response(

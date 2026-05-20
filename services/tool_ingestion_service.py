@@ -29,6 +29,28 @@ embedding_model = SentenceTransformer(
 
 
 # ----------------------------------------
+# Add Chunk To ChromaDB
+# ----------------------------------------
+
+def add_chunk(
+    chunk_id,
+    chunk_text,
+    metadata
+):
+
+    embedding = embedding_model.encode(
+        chunk_text
+    ).tolist()
+
+    collection.add(
+        documents=[chunk_text],
+        embeddings=[embedding],
+        ids=[chunk_id],
+        metadatas=[metadata]
+    )
+
+
+# ----------------------------------------
 # Tool Ingestion
 # ----------------------------------------
 
@@ -42,18 +64,39 @@ def ingest_tools():
 
             tool_id = str(row.get("Tool ID", ""))
             tool_name = str(row.get("Tool Name", ""))
-            description = str(row.get("Detailed Description", ""))
-            keywords = str(row.get("Keywords", ""))
-            workflows = str(row.get("Related Workflows", ""))
-            automation_logic = str(row.get("Automation Logic", ""))
-            dependencies = str(row.get("Dependencies", ""))
-            reusable_components = str(row.get("Reusable Components", ""))
-            code_path = str(row.get("Code File Path", ""))
+
+            description = str(
+                row.get("Detailed Description", "")
+            )
+
+            keywords = str(
+                row.get("Keywords", "")
+            )
+
+            workflows = str(
+                row.get("Related Workflows", "")
+            )
+
+            automation_logic = str(
+                row.get("Automation Logic", "")
+            )
+
+            dependencies = str(
+                row.get("Dependencies", "")
+            )
+
+            reusable_components = str(
+                row.get("Reusable Components", "")
+            )
+
+            code_path = str(
+                row.get("Code File Path", "")
+            )
 
             code_content = ""
 
             # ----------------------------------------
-            # Read Actual Tool Code
+            # Read Code File
             # ----------------------------------------
 
             if os.path.exists(code_path):
@@ -67,15 +110,15 @@ def ingest_tools():
 
                     code_content = file.read()
 
-            else:
-
-                print(f"Code file not found: {code_path}")
-
             # ----------------------------------------
-            # Combined Engineering Intelligence Context
+            # Create Engineering Chunks
             # ----------------------------------------
 
-            combined_text = f"""
+            chunks = [
+
+                {
+                    "id": f"{tool_id}_description",
+                    "text": f"""
 Tool ID:
 {tool_id}
 
@@ -87,40 +130,89 @@ Description:
 
 Keywords:
 {keywords}
+""",
+                    "metadata": {
+                        "tool_id": tool_id,
+                        "tool_name": tool_name,
+                        "chunk_type": "description"
+                    }
+                },
+
+                {
+                    "id": f"{tool_id}_workflow",
+                    "text": f"""
+Tool ID:
+{tool_id}
+
+Tool Name:
+{tool_name}
 
 Workflows:
 {workflows}
 
 Automation Logic:
 {automation_logic}
+""",
+                    "metadata": {
+                        "tool_id": tool_id,
+                        "tool_name": tool_name,
+                        "chunk_type": "workflow"
+                    }
+                },
+
+                {
+                    "id": f"{tool_id}_dependencies",
+                    "text": f"""
+Tool ID:
+{tool_id}
+
+Tool Name:
+{tool_name}
 
 Dependencies:
 {dependencies}
 
 Reusable Components:
 {reusable_components}
+""",
+                    "metadata": {
+                        "tool_id": tool_id,
+                        "tool_name": tool_name,
+                        "chunk_type": "dependencies"
+                    }
+                },
+
+                {
+                    "id": f"{tool_id}_code",
+                    "text": f"""
+Tool ID:
+{tool_id}
+
+Tool Name:
+{tool_name}
 
 Code:
 {code_content}
-"""
+""",
+                    "metadata": {
+                        "tool_id": tool_id,
+                        "tool_name": tool_name,
+                        "chunk_type": "code"
+                    }
+                }
+            ]
 
             # ----------------------------------------
-            # Generate Embeddings
+            # Store Chunks
             # ----------------------------------------
 
-            embedding = embedding_model.encode(
-                combined_text
-            ).tolist()
+            for chunk in chunks:
 
-            # ----------------------------------------
-            # Store in ChromaDB
-            # ----------------------------------------
-
-            collection.add(
-                documents=[combined_text],
-                embeddings=[embedding],
-                ids=[tool_id]
-            )
+                add_chunk(
+                    chunk["id"],
+                    chunk["text"],
+                    chunk["metadata"]
+                )
 
             print(f"Ingested: {tool_name}")
 
